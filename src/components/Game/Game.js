@@ -1,30 +1,52 @@
 import React from 'react';
 
-import { sample } from '../../utils';
+import { range, sample } from '../../utils';
 import { WORDS } from '../../data';
 import Input from '../Input/Input';
 import Guesses from '../Guesses/Guesses';
+import { NUM_OF_GUESSES_ALLOWED } from '../../constants';
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
 // To make debugging easier, we'll log the solution in the console.
 console.info({ answer });
 
-function Game() {
-  const [guesses, setGuesses] = React.useState([]);
+function generateEmptyGuesses() {
+  return range(NUM_OF_GUESSES_ALLOWED).map(() => {
+    const guess = range(5).map(() => ({
+      char: null,
+      id: crypto.randomUUID(),
+    }));
+    return { id: crypto.randomUUID(), guess, isEmpty: true };
+  });
+}
 
-  function handleInputSbumit(input) {
-    setGuesses((guesses) => [
-      ...guesses,
-      { guess: input, id: crypto.randomUUID() },
-    ]);
+function Game() {
+  const [guesses, setGuesses] = React.useState(generateEmptyGuesses);
+
+  function handleInputSubmit(input) {
+    setGuesses((guesses) => {
+      const emptyGuessIndex = guesses.findIndex(({ isEmpty }) => isEmpty);
+
+      if (emptyGuessIndex === -1) return guesses;
+
+      const newGuesses = [...guesses];
+      newGuesses[emptyGuessIndex].guess = newGuesses[emptyGuessIndex].guess.map(
+        (guessItem, index) => ({
+          ...guessItem,
+          char: input.charAt(index),
+        }),
+      );
+
+      newGuesses[emptyGuessIndex].isEmpty = false;
+      return newGuesses;
+    });
   }
 
   return (
     <>
-      Put a game here!
       <Guesses guesses={guesses} />
-      <Input onSubmit={handleInputSbumit} />
+      <Input onSubmit={handleInputSubmit} />
     </>
   );
 }
