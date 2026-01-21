@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Input({ onSubmit }) {
+function Input({ onSubmit, disabled }) {
   const [inputValue, setInputValue] = React.useState('');
 
   function handleSubmit(event) {
@@ -19,6 +19,7 @@ function Input({ onSubmit }) {
     <form onSubmit={handleSubmit} className="guess-input-wrapper">
       <label htmlFor="guess-input">Enter guess:</label>
       <input
+        disabled={disabled}
         id="guess-input"
         type="text"
         value={inputValue}

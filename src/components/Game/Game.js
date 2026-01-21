@@ -6,6 +6,7 @@ import Input from '../Input/Input';
 import Guesses from '../Guesses/Guesses';
 import { NUM_OF_GUESSES_ALLOWED } from '../../constants';
 import { WORDS } from '../../data';
+import GameEndBanner from '../GameEndBanner/GameEndBanner';
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -25,6 +26,8 @@ function generateEmptyGuesses() {
 
 function Game() {
   const [guesses, setGuesses] = React.useState(generateEmptyGuesses);
+  const [gameStatus, setGameStatus] = React.useState('ongoing');
+  const [guessesNumber, setGuessesNumber] = React.useState(0);
 
   function handleInputSubmit(input) {
     const guessStatus = checkGuess(input, answer);
@@ -45,12 +48,22 @@ function Game() {
     newGuesses[emptyGuessIndex].isEmpty = false;
 
     setGuesses(newGuesses);
+    setGuessesNumber(guessesNumber + 1);
+
+    const haveWon = guessStatus.every(({ status })=> status === 'correct');
+
+    if(haveWon) {
+      setGameStatus('won');
+    } else if(emptyGuessIndex >= NUM_OF_GUESSES_ALLOWED - 1) {
+      setGameStatus('lost');
+    }
   }
 
   return (
     <>
       <Guesses guesses={guesses} />
-      <Input onSubmit={handleInputSubmit} />
+      <Input onSubmit={handleInputSubmit} disabled={gameStatus !== 'ongoing'} />
+      <GameEndBanner gameStatus={gameStatus} answer={answer} guessesNumber={guessesNumber} />
     </>
   );
 }
